@@ -4,6 +4,7 @@ from numpy.lib.npyio import save
 import torch.utils.data
 from PIL import Image
 from datetime import datetime
+import math
 
 from network.hardware.device import get_device
 #from network.inference.post_process import post_process_output
@@ -44,7 +45,11 @@ class GraspGenerator:
         self.fig = fig
         self.network = network
 
-        self.PIX_CONVERSION = 277 * IMG_WIDTH/224
+        # Derive pixel-to-metre ratio from the camera field of view instead of
+        # using a magic constant. This keeps the predicted grasp positions
+        # consistent if the image size or camera FOV changes.
+        f_pixels = (IMG_WIDTH / 2) / math.tan(math.radians(camera.fov) / 2)
+        self.PIX_CONVERSION = f_pixels
 
         self.IMG_WIDTH = IMG_WIDTH
         print (self.IMG_WIDTH)
